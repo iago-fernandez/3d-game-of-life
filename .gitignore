@@ -416,3 +416,33 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# --- CMake / Ninja ---
+/build/
+/build-*/
+/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+
+# Version CMakePresets.json; ignore user-specific presets
+CMakeUserPresets.json
+
+# --- vcpkg (manifest mode) ---
+/vcpkg_installed/
+/vcpkg-configuration.json.user
+
+# --- Tooling / IDE ---
+.idea/
+compile_commands.json
+
+# --- Runtime / app state ---
+imgui.ini
+
+# --- OS / misc ---
+.DS_Store
+Thumbs.db
