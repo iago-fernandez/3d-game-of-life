@@ -417,7 +417,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-# --- CMake / Ninja ---
+# CMake / Ninja
 /build/
 /build-*/
 /cmake-build-*/
@@ -432,17 +432,17 @@ Makefile
 # Version CMakePresets.json; ignore user-specific presets
 CMakeUserPresets.json
 
-# --- vcpkg (manifest mode) ---
+# vcpkg (manifest mode)
 /vcpkg_installed/
 /vcpkg-configuration.json.user
 
-# --- Tooling / IDE ---
+# Tooling / IDE
 .idea/
 compile_commands.json
 
-# --- Runtime / app state ---
+# Runtime / app state
 imgui.ini
 
-# --- OS / misc ---
+# OS / misc
 .DS_Store
 Thumbs.db
