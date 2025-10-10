@@ -6,6 +6,7 @@
 out vec2 vUV; // UV in [0,1] across the screen
 
 void main() {
+
     // Two-triangle quad (CCW)
     const vec2 positions[6] = vec2[](
         vec2(-1.0, -1.0),
