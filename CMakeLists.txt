@@ -13,9 +13,10 @@ find_package(OpenGL REQUIRED)
 add_executable(GameOfLife
     src/main.cpp
     src/utils/shaderUtils.cpp
+    src/core/gameLogic.cpp
 )
 
-target_include_directories(GameOfLife PRIVATE src)
+target_include_directories(GameOfLife PRIVATE src include)
 
 target_link_libraries(GameOfLife PRIVATE
     glfw
