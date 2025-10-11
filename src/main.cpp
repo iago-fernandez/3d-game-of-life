@@ -11,12 +11,14 @@
 #include <imgui_impl_opengl3.h>
 
 #include "../include/utils/shaderUtils.h"
+#include "../include/core/gameLogic.h"
 
 int SCR_WIDTH = 800;
 int SCR_HEIGHT = 800;
 const int GRID_WIDTH = 20;
 const int GRID_HEIGHT = 20;
-std::vector<uint8_t> grid(GRID_WIDTH * GRID_HEIGHT, 0);
+
+Life life(GRID_WIDTH, GRID_HEIGHT);
 
 GLint gridSizeLoc;
 GLint viewportPxLoc;
@@ -30,6 +32,8 @@ GLint hoverBoostLoc;
 GLuint stateTex = 0;
 
 bool mouseDownPrev = false;
+bool spacePrev = false;
+bool cPrev = false;
 
 static void glfw_error_callback(int code, const char* desc) {
     std::fprintf(stderr, "GLFW error %d: %s\n", code, desc);
@@ -123,7 +127,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // important for GL_R8
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, GRID_WIDTH, GRID_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, grid.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, GRID_WIDTH, GRID_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, life.data());
     
     glUniform2i(gridSizeLoc, GRID_WIDTH, GRID_HEIGHT);
     glUniform3f(deadColorLoc, 0.92f, 0.92f, 0.92f);
@@ -153,8 +157,8 @@ int main() {
         // Click-to-toggle (single texel update)
         bool mouseDown = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
         if (mouseDown && !mouseDownPrev && hx >= 0 && hy >= 0) {
-            uint8_t &v = grid[hy * GRID_WIDTH + hx];
-            v ^= 1; // toggle 0 <-> 1
+            uint8_t& v = life.at(hx, hy);
+            v ^= 1; // toggle
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, stateTex);
@@ -162,6 +166,28 @@ int main() {
             glTexSubImage2D(GL_TEXTURE_2D, 0, hx, hy, 1, 1, GL_RED, GL_UNSIGNED_BYTE, &v);
         }
         mouseDownPrev = mouseDown;
+
+        // SPACE to take a step
+        bool spaceNow = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+        if (spaceNow && !spacePrev) {
+            life.step();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, stateTex);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GRID_WIDTH, GRID_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, life.data());
+        }
+        spacePrev = spaceNow;
+
+        // C to clear grid
+        bool cNow = (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS);
+        if (cNow && !cPrev) {
+            life.clear();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, stateTex);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GRID_WIDTH, GRID_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, life.data());
+        }
+        cPrev = cNow;
 
         // Bind texture and draw
         glActiveTexture(GL_TEXTURE0);
