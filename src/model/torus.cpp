@@ -14,7 +14,7 @@ TorusMesh makeTorusGrid(int columns, int rows, float outerRadius, float innerRad
 
     const int vertexCols = columns + 1;
     const int vertexRows = rows + 1;
-    const float TwoPi = glm::two_pi<float>();
+    const float TWO_PI = glm::two_pi<float>();
 
     std::vector<Vertex> vertices(static_cast<std::size_t>(vertexCols) * static_cast<std::size_t>(vertexRows));
     auto vertexIndex = [&](int i, int j) -> int { return j * vertexCols + i; };
@@ -23,14 +23,14 @@ TorusMesh makeTorusGrid(int columns, int rows, float outerRadius, float innerRad
     for (int j = 0; j < vertexRows; ++j) {
 
         const float v = static_cast<float>(j) / static_cast<float>(rows);
-        const float angMinor = (0.5f - v) * TwoPi; // minor angle (tube)
+        const float angMinor = (0.5f - v) * TWO_PI;  // minor angle (tube)
         const float cosMinor = std::cos(angMinor);
         const float sinMinor = std::sin(angMinor);
 
         for (int i = 0; i < vertexCols; ++i) {
 
             const float u = static_cast<float>(i) / static_cast<float>(columns);
-            const float angMajor = u * TwoPi; // major angle (around the ring)
+            const float angMajor = u * TWO_PI;   // major angle (around the ring)
             const float cosMajor = std::cos(angMajor);
             const float sinMajor = std::sin(angMajor);
 
@@ -43,7 +43,7 @@ TorusMesh makeTorusGrid(int columns, int rows, float outerRadius, float innerRad
             vertex.normal[0] = cosMajor * cosMinor;
             vertex.normal[1] = sinMajor * cosMinor;
             vertex.normal[2] = sinMinor;
-            vertex.uv[0] = 1.0f - u; // mirror U so grid-right maps to (front-side)torus-right
+            vertex.uv[0] = 1.0f - u;    // mirror U so grid-right maps to (front-side)torus-right
             vertex.uv[1] = v;
 
             vertices[static_cast<std::size_t>(vertexIndex(i, j))] = vertex;

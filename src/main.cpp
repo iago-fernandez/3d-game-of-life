@@ -11,8 +11,35 @@
 #include "../include/core/gameLogic.h"
 #include "../include/model/torus.h"
 
-int SCR_WIDTH = 800;
-int SCR_HEIGHT = 800;
+struct OrbitCamera {
+
+    glm::vec3 target = { 0.0f, 0.0f, 0.0f };
+    float distance = 15.0f;
+    float yaw = 0.0f;
+    float pitch = glm::radians(-20.0f);
+
+    glm::mat4 view() const {
+
+        glm::vec3 dir = {cosf(pitch) * cosf(yaw), sinf(pitch), cosf(pitch) * sinf(yaw)};
+        glm::vec3 eye = target - dir * distance;
+
+        return glm::lookAt(eye, target, {0.0f, 1.0f, 0.0f});
+    }
+};
+
+OrbitCamera camera;
+
+bool rotating3D = false;
+double lastX3D = 0.0, lastY3D = 0.0;
+double scrollDelta3D = 0.0;
+
+static void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+
+    scrollDelta3D += yOffset;
+}
+
+int screenWidth = 1600;
+int screenHeight = 800;
 const int GRID_WIDTH = 50;
 const int GRID_HEIGHT = 50;
 
@@ -51,17 +78,19 @@ bool spacePrev = false;
 bool cPrev = false;
 
 static void glfw_error_callback(int code, const char* desc) {
+
     std::fprintf(stderr, "GLFW error %d: %s\n", code, desc);
 }
 
 static void framebuffer_size_callback(GLFWwindow*, int w, int h) {
+
     glViewport(0, 0, w, h);
 }
 
 auto mouse_to_cell = [&](double mx, double my, int& cx, int& cy) {
 
-    cx = static_cast<int>(mx * GRID_WIDTH / SCR_WIDTH);
-    cy = static_cast<int>((SCR_HEIGHT - 1 - my) * GRID_HEIGHT / SCR_HEIGHT);
+    cx = static_cast<int>(mx * GRID_WIDTH / screenWidth);
+    cy = static_cast<int>((screenHeight - 1 - my) * GRID_HEIGHT / screenHeight);
 
     if (cx < 0 || cy < 0 || cx >= GRID_WIDTH || cy >= GRID_HEIGHT) {
         cx = cy = -1;
@@ -77,7 +106,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Game of Life", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Game of Life", nullptr, nullptr);
     if (!window) { std::fprintf(stderr, "Failed to create window\n"); glfwTerminate(); return 1; }
     glfwMakeContextCurrent(window);
 
@@ -89,8 +118,9 @@ int main() {
     }
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glViewport(0, 0, screenWidth, screenHeight);
     glClearDepth(1.0f);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -167,21 +197,55 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glfwGetFramebufferSize(window, &SCR_WIDTH, &SCR_HEIGHT);
-        const int leftW = SCR_WIDTH / 2;
-        const int rightW = SCR_WIDTH - leftW;
+        glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+        const int leftViewportWidth = screenWidth / 2;
+        const int rightViewportWidth = screenWidth - leftViewportWidth;
 
         double mx, my;
         glfwGetCursorPos(window, &mx, &my);
 
+        // Torus controls (right viewport)
+
+        bool inRight = (mx >= leftViewportWidth && mx < screenWidth && my >= 0 && my < screenHeight);
+
+        bool L = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+        if (!inRight) rotating3D = false;
+        if (inRight && L && !rotating3D) {
+            rotating3D = true;
+            glfwGetCursorPos(window, &lastX3D, &lastY3D);
+        }
+        if (!L) rotating3D = false;
+
+        double cx, cy;
+        glfwGetCursorPos(window, &cx, &cy);
+        double dx = cx - lastX3D;
+        double dy = cy - lastY3D;
+
+        if (inRight && rotating3D) {
+            const float rotSpeed = 0.005f;
+            camera.yaw += (float)dx * rotSpeed;
+            camera.pitch -= (float)dy * rotSpeed;
+            const float limit = glm::radians(89.0f);
+            camera.pitch = glm::clamp(camera.pitch, -limit, limit);
+            lastX3D = cx; lastY3D = cy;
+        }
+
+        if (inRight && scrollDelta3D != 0.0) {
+            camera.distance *= std::exp((float)(-scrollDelta3D) * 0.15f);
+            camera.distance = glm::clamp(camera.distance, 1.0f, 200.0f);
+            scrollDelta3D = 0.0;
+        }
+
         int hx = -1, hy = -1;
-        if (mx >= 0.0 && mx < leftW) {
-            hx = static_cast<int>(mx * GRID_WIDTH / leftW);
-            hy = static_cast<int>((SCR_HEIGHT - 1 - my) * GRID_HEIGHT / SCR_HEIGHT);
+        if (mx >= 0.0 && mx < leftViewportWidth) {
+            hx = static_cast<int>(mx * GRID_WIDTH / leftViewportWidth);
+            hy = static_cast<int>((screenHeight - 1 - my) * GRID_HEIGHT / screenHeight);
             if (hx < 0 || hy < 0 || hx >= GRID_WIDTH || hy >= GRID_HEIGHT) {
                 hx = hy = -1;
             }
         }
+
+        // Grid controls (left viewport)
 
         bool mouseDown = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
         if (mouseDown && !mouseDownPrev && hx >= 0 && hy >= 0) {
@@ -215,11 +279,12 @@ int main() {
         cPrev = cNow;
 
         // 2D (left viewframe)
+
         glDisable(GL_DEPTH_TEST);
-        glViewport(0, 0, leftW, SCR_HEIGHT);
+        glViewport(0, 0, leftViewportWidth, screenHeight);
 
         glUseProgram(program2d);
-        glUniform2f(uViewportPx2DLoc, (float)leftW, (float)SCR_HEIGHT);
+        glUniform2f(uViewportPx2DLoc, (float)leftViewportWidth, (float)screenHeight);
         glUniform2i(uGridSize2DLoc, GRID_WIDTH, GRID_HEIGHT);
         glUniform3f(uDeadColor2DLoc, 0.92f, 0.92f, 0.92f);
         glUniform3f(uAliveColor2DLoc, 0.12f, 0.12f, 0.12f);
@@ -239,12 +304,13 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // 3D (right viewframe)
-        glEnable(GL_DEPTH_TEST);
-        glViewport(leftW, 0, rightW, SCR_HEIGHT);
 
-        const float aspect = (rightW > 0) ? (float)rightW / (float)SCR_HEIGHT : 1.0f;
-        glm::mat4 proj = glm::perspective(glm::radians(25.0f), aspect, 0.1f, 100.0f);
-        glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glEnable(GL_DEPTH_TEST);
+        glViewport(leftViewportWidth, 0, rightViewportWidth, screenHeight);
+
+        const float aspect = (rightViewportWidth > 0) ? (float)rightViewportWidth / (float)screenHeight : 1.0f;
+        glm::mat4 proj = glm::perspective(glm::radians(25.0f), aspect, 0.1f, 200.0f);
+        glm::mat4 view = camera.view();
         glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
         glm::mat4 mvp = proj * view * model;
 
