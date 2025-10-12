@@ -14,6 +14,7 @@ add_executable(GameOfLife
     src/main.cpp
     src/utils/shaderUtils.cpp
     src/core/gameLogic.cpp
+    src/model/torus.cpp
 )
 
 target_include_directories(GameOfLife PRIVATE src include)

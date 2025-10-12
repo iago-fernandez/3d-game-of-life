@@ -3,48 +3,54 @@
 in vec2 vUV;
 out vec4 FragColor;
 
-uniform ivec2 gridSize; 
-uniform vec2  viewportPx;
+uniform ivec2 uGridSize;
+uniform vec2 uViewportPx;
+uniform sampler2D uState;
 
-// Per-cell state texture: GL_R8, one texel per cell (0 or 1)
-uniform sampler2D state;
+uniform vec3 uDeadColor;
+uniform vec3 uAliveColor;
 
-uniform vec3 deadColor;
-uniform vec3 aliveColor;
+uniform float uLineThicknessPx;
+uniform vec3 uLineColor;
 
-uniform float lineThicknessPx;
-uniform vec3  lineColor;
+uniform ivec2 uHoverCell;     // (-1,-1) if none
+uniform float uHoverBoost;
 
-// Hover highlight ((-1,-1) if none)
-uniform ivec2 hoverCell;
-uniform float hoverBoost;
+uniform vec3 uEdgeUColor;
+uniform vec3 uEdgeVColor;
+uniform float uEdgeThicknessPx;
 
 void main() {
 
-    // Current cell from screen-space position
-    vec2 p = gl_FragCoord.xy;
-    vec2 cellPx = viewportPx / vec2(gridSize);
-    ivec2 cell = ivec2(floor(p / cellPx));
-    if (any(lessThan(cell, ivec2(0))) || any(greaterThanEqual(cell, gridSize))) {
+    vec2 fragPx = gl_FragCoord.xy;
+    vec2 cellPx = uViewportPx / vec2(uGridSize);
+    ivec2 cell = ivec2(floor(fragPx / cellPx));
+    if (any(lessThan(cell, ivec2(0))) || any(greaterThanEqual(cell, uGridSize))) {
         discard;
     }
 
-    // Cell state
-    float s = texelFetch(state, cell, 0).r;
-    vec3 base = (s > 0.0) ? aliveColor : deadColor; // any non-zero as alive
+    float stateVal = texelFetch(uState, cell, 0).r;
+    vec3 baseColor = (stateVal > 0.0) ? uAliveColor : uDeadColor;
 
-    // Hover brighten
-    bool isHover = all(equal(cell, hoverCell));
+    bool isHover = all(equal(cell, uHoverCell));
     if (isHover) {
-        base = clamp(base + vec3(hoverBoost), 0.0, 1.0);
+        baseColor = clamp(baseColor + vec3(uHoverBoost), 0.0, 1.0);
     }
 
-    // Screen-space border with constant pixel thickness
-    vec2 uv = fract(p / cellPx);
-    float edgePx = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)) * min(cellPx.x, cellPx.y);
+    vec2 cellUV = fract(fragPx / cellPx);
+    float distToEdgePx = min(min(cellUV.x, 1.0 - cellUV.x), min(cellUV.y, 1.0 - cellUV.y)) * min(cellPx.x, cellPx.y);
     float aa = 0.75;
-    float edgeMask = 1.0 - smoothstep(lineThicknessPx - aa, lineThicknessPx + aa, edgePx);
+    float cellEdgeMask = 1.0 - smoothstep(uLineThicknessPx - aa, uLineThicknessPx + aa, distToEdgePx);
 
-    vec3 col = mix(base, lineColor, edgeMask);
-    FragColor = vec4(col, 1.0);
+    vec3 color = mix(baseColor, uLineColor, cellEdgeMask);
+
+    float distEdgeX = min(fragPx.x, uViewportPx.x - fragPx.x);
+    float distEdgeY = min(fragPx.y, uViewportPx.y - fragPx.y);
+    float axisUMask = 1.0 - smoothstep(uEdgeThicknessPx - aa, uEdgeThicknessPx + aa, distEdgeX);
+    float axisVMask = 1.0 - smoothstep(uEdgeThicknessPx - aa, uEdgeThicknessPx + aa, distEdgeY);
+
+    color = mix(color, uEdgeUColor, axisUMask);
+    color = mix(color, uEdgeVColor, axisVMask);
+
+    FragColor = vec4(color, 1.0);
 }
