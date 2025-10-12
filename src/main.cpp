@@ -13,8 +13,8 @@
 
 int SCR_WIDTH = 800;
 int SCR_HEIGHT = 800;
-const int GRID_WIDTH = 20;
-const int GRID_HEIGHT = 20;
+const int GRID_WIDTH = 50;
+const int GRID_HEIGHT = 50;
 
 Life life(GRID_WIDTH, GRID_HEIGHT);
 
@@ -254,11 +254,11 @@ int main() {
         glUniform2i(uGridSize3DLoc, GRID_WIDTH, GRID_HEIGHT);
         glUniform3f(uDeadColor3DLoc, 1.0f, 1.0f, 1.0f);
         glUniform3f(uAliveColor3DLoc, 0.0f, 0.0f, 0.0f);
-        glUniform1f(uLinePx3DLoc, 0.003f);
+        glUniform1f(uLinePx3DLoc, 0.7f);
         glUniform3f(uLineColor3DLoc, 0.75f, 0.75f, 0.75f);
         glUniform3f(uEdgeUColor3DLoc, 0.30f, 0.50f, 1.00f);
         glUniform3f(uEdgeVColor3DLoc, 1.00f, 0.35f, 0.35f);
-        glUniform1f(uEdgePxUV3DLoc, 0.004f);
+        glUniform1f(uEdgePxUV3DLoc, 2.0f);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, stateTex);
