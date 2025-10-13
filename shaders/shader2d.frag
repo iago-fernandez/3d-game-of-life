@@ -37,17 +37,29 @@ void main() {
         baseColor = clamp(baseColor + vec3(uHoverBoost), 0.0, 1.0);
     }
 
-    vec2 cellUV = fract(fragPx / cellPx);
-    float distToEdgePx = min(min(cellUV.x, 1.0 - cellUV.x), min(cellUV.y, 1.0 - cellUV.y)) * min(cellPx.x, cellPx.y);
-    float aa = 0.75;
-    float cellEdgeMask = 1.0 - smoothstep(uLineThicknessPx - aa, uLineThicknessPx + aa, distToEdgePx);
+    // Grid lines with axis-wise derivative-based AA
+    float w = uLineThicknessPx;
 
+    float fx = fract(fragPx.x / cellPx.x);
+    float dx = min(fx, 1.0 - fx) * cellPx.x;      // distance to nearest vertical line (px)
+    float aax = max(fwidth(fragPx.x), 0.5);
+    float maskX = 1.0 - smoothstep(w - aax, w + aax, dx);
+
+    float fy = fract(fragPx.y / cellPx.y);
+    float dy = min(fy, 1.0 - fy) * cellPx.y;      // distance to nearest horizontal line (px)
+    float aay = max(fwidth(fragPx.y), 0.5);
+    float maskY = 1.0 - smoothstep(w - aay, w + aay, dy);
+
+    float cellEdgeMask = max(maskX, maskY);
     vec3 color = mix(baseColor, uLineColor, cellEdgeMask);
 
+    // Outer axes with derivative-based AA
     float distEdgeX = min(fragPx.x, uViewportPx.x - fragPx.x);
     float distEdgeY = min(fragPx.y, uViewportPx.y - fragPx.y);
-    float axisUMask = 1.0 - smoothstep(uEdgeThicknessPx - aa, uEdgeThicknessPx + aa, distEdgeX);
-    float axisVMask = 1.0 - smoothstep(uEdgeThicknessPx - aa, uEdgeThicknessPx + aa, distEdgeY);
+    float aaEdgeX = fwidth(distEdgeX);
+    float aaEdgeY = fwidth(distEdgeY);
+    float axisUMask = 1.0 - smoothstep(uEdgeThicknessPx - aaEdgeX, uEdgeThicknessPx + aaEdgeX, distEdgeX);
+    float axisVMask = 1.0 - smoothstep(uEdgeThicknessPx - aaEdgeY, uEdgeThicknessPx + aaEdgeY, distEdgeY);
 
     color = mix(color, uEdgeUColor, axisUMask);
     color = mix(color, uEdgeVColor, axisVMask);
