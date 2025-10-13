@@ -14,7 +14,6 @@
 #include "../include/core/gameLogic.h"
 #include "../include/model/torus.h"
 
-// Simulation control
 bool   simRunning = false;
 float  simStepsPerSec = 5.0f;
 double simAccumulator = 0.0;
@@ -42,17 +41,18 @@ bool rotating3D = false;
 double lastX3D = 0.0, lastY3D = 0.0;
 double scrollDelta3D = 0.0;
 
-static void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+static void scroll_callback(GLFWwindow* /*window*/, double /*xOffset*/, double yOffset) {
 
     scrollDelta3D += yOffset;
 }
 
 int screenWidth = 1600;
 int screenHeight = 800;
-const int GRID_WIDTH = 50;
-const int GRID_HEIGHT = 50;
 
-Life life(GRID_WIDTH, GRID_HEIGHT);
+int gridWidth = 50;
+int gridHeight = 50;
+
+Life life(gridWidth, gridHeight);
 
 // 2D uniforms
 GLint uGridSize2DLoc;
@@ -168,9 +168,9 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, GRID_WIDTH, GRID_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, life.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, gridWidth, gridHeight, 0, GL_RED, GL_UNSIGNED_BYTE, life.data());
 
-    glUniform2i(uGridSize2DLoc, GRID_WIDTH, GRID_HEIGHT);
+    glUniform2i(uGridSize2DLoc, gridWidth, gridHeight);
     glUniform3f(uDeadColor2DLoc, 0.92f, 0.92f, 0.92f);
     glUniform3f(uAliveColor2DLoc, 0.12f, 0.12f, 0.12f);
     glUniform1f(uLineThicknessPx2DLoc, 0.5f);
@@ -185,9 +185,9 @@ int main() {
         double lx = mx - (double)vpX;
         double ly = my - (double)vpY;
         if (lx < 0.0 || ly < 0.0 || lx >= vpW || ly >= vpH) { cx = cy = -1; return; }
-        cx = (int)(lx * GRID_WIDTH / (double)vpW);
-        cy = (int)(((double)vpH - 1.0 - ly) * GRID_HEIGHT / (double)vpH);
-        if (cx < 0 || cy < 0 || cx >= GRID_WIDTH || cy >= GRID_HEIGHT) { cx = cy = -1; }
+        cx = (int)(lx * gridWidth / (double)vpW);
+        cy = (int)(((double)vpH - 1.0 - ly) * gridHeight / (double)vpH);
+        if (cx < 0 || cy < 0 || cx >= gridWidth || cy >= gridHeight) { cx = cy = -1; }
         };
 
     // Step simulation + upload to texture
@@ -197,7 +197,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, stateTex);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-            GRID_WIDTH, GRID_HEIGHT,
+            gridWidth, gridHeight,
             GL_RED, GL_UNSIGNED_BYTE, life.data());
         };
 
@@ -208,7 +208,7 @@ int main() {
     }
     catch (const std::exception& e) { std::fprintf(stderr, "%s\n", e.what()); return 1; }
 
-    auto torus = makeTorusGrid(GRID_WIDTH, GRID_HEIGHT, 2.0f, 0.7f);
+    auto torus = makeTorusGrid(gridWidth, gridHeight, 2.0f, 0.7f);
 
     uMVP3DLoc = glGetUniformLocation(programTorus, "uMVP");
     uState3DLoc = glGetUniformLocation(programTorus, "uState");
@@ -223,6 +223,10 @@ int main() {
 
     const int kToolbarMargin = 12;
     const ImVec2 kBtnSize(64.0f, 40.0f);
+
+    // Staged inputs to avoid applying while typing
+    static int colsInput = gridWidth;
+    static int rowsInput = gridHeight;
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -255,7 +259,7 @@ int main() {
         glfwGetCursorPos(window, &mx, &my);
 
         {
-            ImGui::SetNextWindowBgAlpha(0.55f);
+            ImGui::SetNextWindowBgAlpha(0.45f);
             ImGui::SetNextWindowPos(
                 ImVec2((float)(leftViewportWidth + rightViewportWidth - kToolbarMargin), (float)(screenHeight - kToolbarMargin)),
                 ImGuiCond_Always, ImVec2(1.0f, 1.0f));
@@ -271,8 +275,25 @@ int main() {
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 12));
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
 
+            const ImGuiStyle& style = ImGui::GetStyle();
+            const float h = ImGui::GetFrameHeight();
+
+            auto VerticalSeparator = [&](float height, float sidePad)
+                {
+                    ImGui::Dummy(ImVec2(sidePad, height));
+                    ImGui::SameLine();
+                    ImVec2 p = ImGui::GetCursorScreenPos();
+                    ImU32 col = ImGui::GetColorU32(ImGuiCol_Separator);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(p.x, p.y), ImVec2(p.x, p.y + height), col, 1.0f);
+                    ImGui::Dummy(ImVec2(1.0f, height));
+                    ImGui::SameLine();
+                    ImGui::Dummy(ImVec2(sidePad, height));
+                    ImGui::SameLine();
+                };
+
+            // Play/Pause
             const char* playLabel = simRunning ? "Pause" : "Play";
-            if (ImGui::Button(playLabel, kBtnSize)) {
+            if (ImGui::Button(playLabel, ImVec2(64.0f, h))) {
                 simRunning = !simRunning;
                 if (simRunning) {
                     simAccumulator = 0.0;
@@ -281,13 +302,92 @@ int main() {
             }
             ImGui::SameLine();
 
-            if (ImGui::Button("Step", kBtnSize)) {
+            // Step
+            if (ImGui::Button("Step", ImVec2(64.0f, h))) {
                 step_once();
             }
             ImGui::SameLine();
 
-            ImGui::SetNextItemWidth(220.0f);
+            // Speed
+            ImGui::SetNextItemWidth(180.0f);
             ImGui::SliderFloat("##Speed", &simStepsPerSec, 0.5f, 10.0f, "Speed: %.1f");
+
+            // Separator
+            ImGui::SameLine();
+            VerticalSeparator(h * 1.01f, 3.0f);
+
+            // Grid size controls
+            auto clamp10_100 = [](int v) { return v < 10 ? 10 : (v > 100 ? 100 : v); };
+
+            float threeChars = ImGui::CalcTextSize("000").x;
+            float inputWidth = threeChars + style.FramePadding.x * 2.5f;
+
+            bool commitSize = false;
+            ImGuiInputTextFlags numFlags = ImGuiInputTextFlags_CharsDecimal |
+                ImGuiInputTextFlags_AutoSelectAll;
+
+            // Rows
+            ImGui::AlignTextToFramePadding(); ImGui::TextUnformatted("Rows:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(inputWidth);
+            ImGui::InputInt("##Rows", &rowsInput, 0, 0, numFlags);
+            commitSize |= (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter)) || ImGui::IsItemDeactivatedAfterEdit();
+            ImGui::SameLine();
+            if (ImGui::Button("-##rows", ImVec2(0.0f, h))) { rowsInput = clamp10_100(rowsInput - 1); commitSize = true; }
+            ImGui::SameLine();
+            if (ImGui::Button("+##rows", ImVec2(0.0f, h))) { rowsInput = clamp10_100(rowsInput + 1); commitSize = true; }
+            ImGui::SameLine();
+
+            // Columns
+            ImGui::AlignTextToFramePadding(); ImGui::TextUnformatted("Columns:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(inputWidth);
+            ImGui::InputInt("##Cols", &colsInput, 0, 0, numFlags);
+            commitSize |= (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter)) || ImGui::IsItemDeactivatedAfterEdit();
+            ImGui::SameLine();
+            if (ImGui::Button("-##cols", ImVec2(0.0f, h))) { colsInput = clamp10_100(colsInput - 1); commitSize = true; }
+            ImGui::SameLine();
+            if (ImGui::Button("+##cols", ImVec2(0.0f, h))) { colsInput = clamp10_100(colsInput + 1); commitSize = true; }
+
+            if (commitSize) {
+                int colsTmp = clamp10_100(colsInput);
+                int rowsTmp = clamp10_100(rowsInput);
+                colsInput = colsTmp; rowsInput = rowsTmp;
+
+                if (colsTmp != gridWidth || rowsTmp != gridHeight) {
+                    Life oldLife = life;
+                    int oldW = gridWidth, oldH = gridHeight;
+
+                    gridWidth = colsTmp;
+                    gridHeight = rowsTmp;
+
+                    Life newLife(gridWidth, gridHeight);
+
+                    int copyW = (oldW < gridWidth) ? oldW : gridWidth;
+                    int copyH = (oldH < gridHeight) ? oldH : gridHeight;
+
+                    int srcY0 = oldH - copyH;
+                    int dstY0 = gridHeight - copyH;
+
+                    for (int y = 0; y < copyH; ++y) {
+                        for (int x = 0; x < copyW; ++x) {
+                            newLife.at(x, dstY0 + y) = oldLife.at(x, srcY0 + y);
+                        }
+                    }
+
+                    life = std::move(newLife);
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, stateTex);
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, gridWidth, gridHeight, 0, GL_RED, GL_UNSIGNED_BYTE, life.data());
+
+                    destroyTorus(torus);
+                    torus = makeTorusGrid(gridWidth, gridHeight, 2.0f, 0.7f);
+
+                    simAccumulator = 0.0;
+                }
+            }
 
             ImGui::PopStyleVar(2);
             ImGui::End();
@@ -306,7 +406,7 @@ int main() {
 
         glUseProgram(program2d);
         glUniform2f(uViewportPx2DLoc, (float)leftViewportWidth, (float)screenHeight);
-        glUniform2i(uGridSize2DLoc, GRID_WIDTH, GRID_HEIGHT);
+        glUniform2i(uGridSize2DLoc, gridWidth, gridHeight);
         glUniform3f(uDeadColor2DLoc, 0.92f, 0.92f, 0.92f);
         glUniform3f(uAliveColor2DLoc, 0.12f, 0.12f, 0.12f);
         glUniform1f(uLineThicknessPx2DLoc, 0.5f);
@@ -324,7 +424,7 @@ int main() {
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        // Grid interaction (left viewport only, not through UI)
+        // Grid interaction
         bool mouseDown = (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
         if (!uiBlocksMouse && mouseDown && !mouseDownPrev && hx >= 0 && hy >= 0) {
             uint8_t& v = life.at(hx, hy);
@@ -342,7 +442,7 @@ int main() {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, stateTex);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GRID_WIDTH, GRID_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, life.data());
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, gridWidth, gridHeight, GL_RED, GL_UNSIGNED_BYTE, life.data());
         }
         spacePrev = spaceNow;
 
@@ -352,7 +452,7 @@ int main() {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, stateTex);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GRID_WIDTH, GRID_HEIGHT, GL_RED, GL_UNSIGNED_BYTE, life.data());
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, gridWidth, gridHeight, GL_RED, GL_UNSIGNED_BYTE, life.data());
         }
         cPrev = cNow;
 
@@ -403,7 +503,7 @@ int main() {
         glUseProgram(programTorus);
         glUniformMatrix4fv(uMVP3DLoc, 1, GL_FALSE, &mvp[0][0]);
         glUniform1i(uState3DLoc, 0);
-        glUniform2i(uGridSize3DLoc, GRID_WIDTH, GRID_HEIGHT);
+        glUniform2i(uGridSize3DLoc, gridWidth, gridHeight);
         glUniform3f(uDeadColor3DLoc, 1.0f, 1.0f, 1.0f);
         glUniform3f(uAliveColor3DLoc, 0.0f, 0.0f, 0.0f);
         glUniform1f(uLinePx3DLoc, 0.7f);
