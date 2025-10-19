@@ -9,9 +9,9 @@ Beyond its visual appeal, the project also serves as:
 * A minimal **computational model of population growth and decay**, based on local interaction rules.
 * A **didactic visualization of toroidal geometry**, showing how a 2D grid can be seamlessly wrapped into a 3D surface.
 * An example of **modern C++ and OpenGL architecture**, with modular systems for logic, rendering, and UI integration.
-* A compact and extensible base for experimentation with **GPU simulations**, **shader-based visualizations**, or **scientific cellular automata** (see [CONTRIBUTE.md](CONTRIBUTE.md) for more info).
+* A compact and extensible base for experimentation with **GPU simulations**, **shader-based visualizations**, or **scientific cellular automata** (see [CONTRIBUTING.md](CONTRIBUTING.md) for more info).
 
-The codebase emphasizes clarity, maintainability, and clean design—ideal for studying or extending.
+The codebase emphasizes clarity, maintainability, and clean design (ideal for studying or extending).
 
 ---
 
@@ -57,8 +57,8 @@ The following image corresponds to the app layout:
 
 The window is divided into two synchronized viewports and a compact toolbar:
 
-* **Left — 2D grid**: interactive editor (toggle cells with left click), hover highlight, and grid overlay.
-* **Right — 3D torus**: orbit camera (left click + drag) and zoom (scroll), showing the same state wrapped on a toroidal surface.
+* **Left - 2D grid**: interactive editor (toggle cells with left click), hover highlight, and grid overlay.
+* **Right - 3D torus**: orbit camera (left click + drag) and zoom (scroll), showing the same state wrapped on a toroidal surface.
 * **Toolbar (bottom-right)**: Play/Pause, Step, Clear, **Speed** slider, and **Rows / Columns** (applied on *Enter* or when the field loses focus).
 
 ---
@@ -80,7 +80,7 @@ The window is divided into two synchronized viewports and a compact toolbar:
 
 The project supports both **command-line builds** and **Visual Studio integration**. All presets use **vcpkg manifests** and a **Ninja generator**, ensuring reproducible, IDE-independent builds.
 
-> ⚙️ The paths and presets are designed for Visual Studio 2022 Community, but they can be easily adapted for Professional or Enterprise editions by changing the Visual Studio folder name in the PowerShell examples.
+> The paths and presets are designed for Visual Studio 2022 Community, but they can be easily adapted for Professional or Enterprise editions by changing the Visual Studio folder name in the PowerShell examples.
 
 ### A) From terminal (no IDE)
 
@@ -99,7 +99,7 @@ cmake --preset x64-release-vcpkg
 cmake --build --preset x64-release-vcpkg
 ```
 
-If using a regular PowerShell (not the Developer shell), you can manually initialize MSVC:
+If using a regular PowerShell (not the developer shell), you can manually initialize MSVC:
 
 ```powershell
 $vsdev = "$env:ProgramFiles\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat"
@@ -147,6 +147,6 @@ The repository is currently optimized for **Windows + MSVC**, but it can be easi
 
 All vcpkg paths are **relative**, and no global environment variables are required.
 
-For details on contributing Linux or macOS build configurations, see **[CONTRIBUTE.md](CONTRIBUTE.md)**.
+For details on contributing Linux or macOS build configurations, see **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
