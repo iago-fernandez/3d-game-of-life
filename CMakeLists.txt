@@ -26,6 +26,11 @@ add_executable(GameOfLife
 
 target_include_directories(GameOfLife PRIVATE src include)
 
+target_compile_definitions(GameOfLife PRIVATE
+    GLFW_INCLUDE_NONE
+    SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shaders"
+)
+
 target_link_libraries(GameOfLife PRIVATE
     glfw
     glad::glad
@@ -33,8 +38,6 @@ target_link_libraries(GameOfLife PRIVATE
     imgui::imgui
     OpenGL::GL
 )
-
-target_compile_definitions(GameOfLife PRIVATE SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 
 if (MSVC)
   target_compile_options(GameOfLife PRIVATE /W4 /permissive-)

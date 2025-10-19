@@ -1,14 +1,17 @@
-{
-  "name": "game-of-life",
-  "version-string": "0.1.0",
-  "dependencies": [
-    "glfw3",
-    "glad",
-    "glm",
-    {
-      "name": "imgui",
-      "features": [ "glfw-binding", "opengl3-binding" ]
-    },
-    "stb"
-  ]
+﻿{
+    "name":  "game-of-life",
+    "version-string":  "0.1.0",
+    "dependencies":  [
+                         "glfw3",
+                         "glad",
+                         "glm",
+                         {
+                             "name":  "imgui",
+                             "features":  [
+                                              "glfw-binding",
+                                              "opengl3-binding"
+                                          ]
+                         }
+                     ],
+    "builtin-baseline":  "74e6536215718009aae747d86d84b78376bf9e09"
 }
