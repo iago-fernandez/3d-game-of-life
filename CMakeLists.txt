@@ -12,9 +12,16 @@ find_package(OpenGL REQUIRED)
 
 add_executable(GameOfLife
     src/main.cpp
-    src/utils/shaderUtils.cpp
+    src/app/app.cpp
+    src/app/input.cpp
+    src/core/camera.cpp
     src/core/gameLogic.cpp
+    src/core/simulation.cpp
     src/model/torus.cpp
+    src/render/renderer2d.cpp
+    src/render/renderer3d.cpp
+    src/ui/toolbar.cpp
+    src/utils/shaderUtils.cpp
 )
 
 target_include_directories(GameOfLife PRIVATE src include)
