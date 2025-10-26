@@ -32,6 +32,8 @@ namespace core {
                 aliveNeighbours += currentBuffer_[yp * gridWidth_ + xp];
 
                 const uint8_t alive = currentBuffer_[y * gridWidth_ + x] ? 1u : 0u; // current cell state
+
+                // Conway's rules
                 nextBuffer_[y * gridWidth_ + x] = alive ? (aliveNeighbours == 2 || aliveNeighbours == 3) : (aliveNeighbours == 3);
             }
         }
