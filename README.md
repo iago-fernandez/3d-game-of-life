@@ -9,7 +9,7 @@ Beyond its visual appeal, the project also serves as:
 * A minimal **computational model of population growth and decay**, based on local interaction rules.
 * A **didactic visualization of toroidal geometry**, showing how a 2D grid can be seamlessly wrapped into a 3D surface.
 * An example of **modern C++ and OpenGL architecture**, with modular systems for logic, rendering, and UI integration.
-* A compact and extensible base for experimentation with **GPU simulations**, **shader-based visualizations**, or **scientific cellular automata** (see [CONTRIBUTE.md](CONTRIBUTE.md) for more info).
+* A compact and extensible base for experimentation with **GPU simulations**, **shader-based visualizations**, or **scientific cellular automata** (see [CONTRIBUTING.md](CONTRIBUTING.md) for more info).
 
 The codebase emphasizes clarity, maintainability, and clean design—ideal for studying or extending.
 
@@ -147,6 +147,6 @@ The repository is currently optimized for **Windows + MSVC**, but it can be easi
 
 All vcpkg paths are **relative**, and no global environment variables are required.
 
-For details on contributing Linux or macOS build configurations, see **[CONTRIBUTE.md](CONTRIBUTE.md)**.
+For details on contributing Linux or macOS build configurations, see **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
