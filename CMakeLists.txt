@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+
 project(GameOfLife LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -40,5 +41,18 @@ target_link_libraries(GameOfLife PRIVATE
 )
 
 if (MSVC)
-  target_compile_options(GameOfLife PRIVATE /W4 /permissive-)
+    target_compile_options(GameOfLife PRIVATE /W4 /permissive-)
+endif()
+
+# Auxiliary tool to generate the topological animation GIF
+add_executable(topologyAnimation "assets/topologyAnimation.cpp")
+
+target_link_libraries(topologyAnimation PRIVATE 
+    glad::glad 
+    glfw 
+    glm::glm
+)
+
+if (MSVC)
+    target_compile_options(topologyAnimation PRIVATE /W4 /permissive-)
 endif()
