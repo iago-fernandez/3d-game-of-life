@@ -38,36 +38,22 @@ namespace core {
          * @param y Row index in [0, gridHeight).
          * @return Reference to the cell value (0 or 1).
          */
-        inline uint8_t& at(int x, int y) {
-            return currentBuffer_[y * gridWidth_ + x];
-        }
+        uint8_t& at(int x, int y);
 
         /**
          * @brief Pointer to the raw buffer for GPU uploads or inspection.
          * @return Read-only pointer to the current buffer (row-major, size = width*height).
          */
-        inline const uint8_t* data() const {
-            return currentBuffer_.data();
-        }
+        const uint8_t* data() const;
 
         int gridWidth_;   // number of columns
         int gridHeight_;  // number of rows
 
     private:
+        int wrap(int index, int length) const;
+
         std::vector<uint8_t> currentBuffer_; // current generation buffer (row-major)
         std::vector<uint8_t> nextBuffer_;    // next generation buffer (work buffer)
-
-        /**
-         * @brief Wrap an index to [0, length) with single-step overflow handling.
-         * @param index Input index, possibly -1 or length.
-         * @param length Interval length.
-         * @return Wrapped index inside [0, length).
-         */
-        inline int wrap(int index, int length) const {
-            if (index >= length) index -= length;
-            else if (index < 0)  index += length;
-            return index;
-        }
     };
 
 }

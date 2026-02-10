@@ -4,13 +4,21 @@
 
 namespace core {
 
-    Simulation::Simulation(int w, int h) : life_(w, h), width_(w), height_(h) {
+    Simulation::Simulation(int w, int h)
+        : life_(w, h)
+        , width_(w)
+        , height_(h) {
+
         glGenTextures(1, &tex_);
         glBindTexture(GL_TEXTURE_2D, tex_);
+
+        // Use nearest filtering for pixel-art look
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        // Ensure byte alignment for R8 texture
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width_, height_, 0, GL_RED, GL_UNSIGNED_BYTE, life_.data());
     }
@@ -19,16 +27,29 @@ namespace core {
         if (tex_) glDeleteTextures(1, &tex_);
     }
 
+    int Simulation::width() const { return width_; }
+    int Simulation::height() const { return height_; }
+    GLuint Simulation::stateTexture() const { return tex_; }
+    float Simulation::stepsPerSecond() const { return stepsPerSec_; }
+    bool Simulation::isRunning() const { return running_; }
+
+    void Simulation::toggleRun() {
+        running_ = !running_;
+    }
+
     void Simulation::setStepsPerSecond(float sps) {
         stepsPerSec_ = (sps <= 0.0f) ? 0.0001f : sps;
     }
 
     void Simulation::advance(double dt) {
         if (!running_) return;
+
         accumulator_ += dt;
-        const double period = 1.0 / std::max(0.0001, (double)stepsPerSec_);
+        const double period = 1.0 / std::max(0.0001, static_cast<double>(stepsPerSec_));
+
         int steps = 0;
-        while (accumulator_ >= period && steps < 240) { // prevents "spiral of death" (no drawing if there are more than 240 steps per frame)
+        // prevent "spiral of death" (cap at 240 steps per frame)
+        while (accumulator_ >= period && steps < 240) {
             life_.step();
             uploadAll();
             accumulator_ -= period;
@@ -48,9 +69,14 @@ namespace core {
 
     void Simulation::toggleCell(int x, int y) {
         if (x < 0 || y < 0 || x >= width_ || y >= height_) return;
+
         uint8_t& v = life_.at(x, y);
         v ^= 1;
-        uploadCell(x, y);
+
+        // Optimization: upload only the changed pixel
+        glBindTexture(GL_TEXTURE_2D, tex_);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RED, GL_UNSIGNED_BYTE, &v);
     }
 
     void Simulation::resize(int newW, int newH) {
@@ -62,19 +88,23 @@ namespace core {
         height_ = newH;
         life_ = Life(width_, height_);
 
+        // Preserve overlapping region (aligned to bottom-left)
         int copyW = std::min(oldW, width_);
         int copyH = std::min(oldH, height_);
-        int srcY0 = oldH - copyH;      // source bottom offset
-        int dstY0 = height_ - copyH;   // destination bottom offset
+        int srcY0 = oldH - copyH;
+        int dstY0 = height_ - copyH;
+
         for (int y = 0; y < copyH; ++y) {
             for (int x = 0; x < copyW; ++x) {
                 life_.at(x, dstY0 + y) = old.at(x, srcY0 + y);
             }
         }
 
+        // Reallocate texture with new dimensions
         glBindTexture(GL_TEXTURE_2D, tex_);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width_, height_, 0, GL_RED, GL_UNSIGNED_BYTE, life_.data());
+
         accumulator_ = 0.0;
     }
 
@@ -85,6 +115,8 @@ namespace core {
     }
 
     void Simulation::uploadCell(int x, int y) {
+        // This is now redundant since toggleCell handles it directly for efficiency,
+        // but kept for interface completeness if called internally.
         glBindTexture(GL_TEXTURE_2D, tex_);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RED, GL_UNSIGNED_BYTE, &life_.at(x, y));

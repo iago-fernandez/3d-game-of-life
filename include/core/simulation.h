@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/gameLogic.h"
+#include "gameLogic.h"
 
 #include <glad/glad.h>
 
@@ -22,26 +22,24 @@ namespace core {
         Simulation(int w, int h);
         ~Simulation();
 
+        // Prevent copying (simulation owns unique GL resources)
+        Simulation(const Simulation&) = delete;
+        Simulation& operator=(const Simulation&) = delete;
+
         /**
          * @brief Current grid width in cells.
          */
-        int width() const {
-            return width_;
-        }
+        int width() const;
 
         /**
          * @brief Current grid height in cells.
          */
-        int height() const {
-            return height_;
-        }
+        int height() const;
 
         /**
          * @brief OpenGL texture handle containing the state (GL_R8).
          */
-        GLuint stateTexture() const {
-            return tex_;
-        }
+        GLuint stateTexture() const;
 
         /**
          * @brief Set fixed-step simulation frequency.
@@ -52,23 +50,17 @@ namespace core {
         /**
          * @brief Get current steps per second.
          */
-        float stepsPerSecond() const {
-            return stepsPerSec_;
-        }
+        float stepsPerSecond() const;
 
         /**
          * @brief Toggle running/paused state.
          */
-        void toggleRun() {
-            running_ = !running_;
-        }
+        void toggleRun();
 
         /**
          * @brief True if the simulation is running.
          */
-        bool isRunning() const {
-            return running_;
-        }
+        bool isRunning() const;
 
         /**
          * @brief Advance the simulation according to elapsed time.
@@ -101,21 +93,17 @@ namespace core {
         void resize(int newW, int newH);
 
     private:
-        // Upload entire CPU buffer to the GL texture
         void uploadAll();
-
-        // Upload a single cell to the GL texture
         void uploadCell(int x, int y);
 
-    private:
-        Life life_;                  // cpu-side state
-        int width_ = 0;              // number of columns
-        int height_ = 0;             // number of rows
-        GLuint tex_ = 0;             // gl texture containing the state (GL_R8)
+        Life life_;          // CPU-side state engine
+        int width_ = 0;      // Cached width
+        int height_ = 0;     // Cached height
+        GLuint tex_ = 0;     // GL texture mirroring state (GL_R8)
 
-        bool running_ = false;       // play/pause flag
-        float stepsPerSec_ = 5.0f;   // fixed step frequency
-        double accumulator_ = 0.0;   // accumulator for fixed stepping
+        bool running_ = false;
+        float stepsPerSec_ = 5.0f;
+        double accumulator_ = 0.0;
     };
 
 }
