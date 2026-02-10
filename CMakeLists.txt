@@ -5,12 +5,14 @@ project(GameOfLife LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Dependencies
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 
+# Main Application Target
 add_executable(GameOfLife
     src/main.cpp
     src/app/app.cpp
@@ -45,7 +47,8 @@ if (MSVC)
 endif()
 
 # Auxiliary tool to generate the topological animation GIF
-add_executable(topologyAnimation "assets/topologyAnimation.cpp")
+# This executable is standalone and does not link to the main application logic
+add_executable(topologyAnimation src/tools/topologyAnimation.cpp)
 
 target_link_libraries(topologyAnimation PRIVATE 
     glad::glad 
