@@ -5,10 +5,12 @@ A high-performance, hardware-accelerated simulation of **Conway's Game of Life**
 
 The simulation operates on a discrete grid mapped onto a topologically finite, yet unbounded surface ($T^2$). This resolves boundary conditions through topological identification rather than artificial clipping, allowing patterns to propagate indefinitely across the manifold.
 
+
+[![Status](https://img.shields.io/badge/status-stable-green?style=flat-square)](https://github.com/iago-fernandez/3d-game-of-life/releases)
 [![Language](https://img.shields.io/badge/language-C%2B%2B17-blue?style=flat-square)](CMakeLists.txt)
-[![Graphics](https://img.shields.io/badge/graphics-OpenGL%203.3-green?style=flat-square)](https://www.opengl.org/)
-[![Build System](https://img.shields.io/badge/build-CMake%20%7C%20vcpkg-orange?style=flat-square)](CMakeLists.txt)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square)](LICENSE)
+[![Graphics](https://img.shields.io/badge/graphics-OpenGL%203.3-yellow?style=flat-square)](https://www.opengl.org/)
+[![Build System](https://img.shields.io/badge/build-CMake%20%7C%20vcpkg-lightgrey?style=flat-square)](CMakeLists.txt)
+[![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)](LICENSE)
 
 ## Core Engineering
 
@@ -164,8 +166,8 @@ The artifacts are placed in the build output directory:
 
 ## Contributing
 
-Contributions regarding performance optimizations (e.g., SIMD implementations) or new mathematical mappings are welcome. Please review the [CONTRIBUTING.md](https://www.google.com/search?q=CONTRIBUTING.md) file for engineering standards before submitting a pull request.
+Contributions regarding performance optimizations (e.g., SIMD implementations) or new mathematical mappings are welcome. Please review the [CONTRIBUTING.md](CONTRIBUTING.md) file for engineering standards before submitting a pull request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
