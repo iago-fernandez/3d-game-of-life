@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/simulation.h"
+#include "../core/simulation.h"
 
 #include <glad/glad.h>
 

@@ -1,38 +1,50 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace core {
 
     /**
-     * @brief Simple orbit camera around a target point.
+     * @brief Simple orbit camera that rotates around a specific target point.
+     *
+     * Handles view matrix calculation based on spherical coordinates (yaw, pitch, distance).
      */
     class OrbitCamera {
     public:
-        glm::vec3 target_{0.0f, 0.0f, 0.0f};
-        float distance_ = 15.0f;
-        float yaw_ = 0.0f;
-        float pitch_ = glm::radians(-20.0f);
+        OrbitCamera() = default;
 
         /**
-         * @brief Build the view matrix.
-         * @return 4x4 view matrix.
+         * @brief Calculate and retrieve the view matrix.
+         * @return A 4x4 view matrix looking at the target.
          */
         glm::mat4 view() const;
 
         /**
-         * @brief Apply mouse drag deltas in pixels to orbit angles.
-         * @param dx Mouse delta X in pixels.
-         * @param dy Mouse delta Y in pixels.
+         * @brief Apply mouse movement to orbit angles.
+         * @param dx Mouse delta X in pixels (yaw).
+         * @param dy Mouse delta Y in pixels (pitch).
          */
         void orbitBy(float dx, float dy);
 
         /**
-         * @brief Apply scroll delta to zoom in/out.
-         * @param scrollY Accumulated scroll amount.
+         * @brief Apply scroll input to zoom distance.
+         * @param scrollY Accumulated scroll delta.
          */
         void zoomBy(float scrollY);
+
+        /**
+         * @brief Get the current camera position in world space.
+         * @return Cartesian coordinates of the camera.
+         */
+        glm::vec3 position() const;
+
+    private:
+        glm::vec3 target_{ 0.0f, 0.0f, 0.0f };
+
+        // Spherical coordinates
+        float distance_ = 15.0f;
+        float yaw_ = 0.0f;
+        float pitch_ = glm::radians(-20.0f);
     };
 
 }

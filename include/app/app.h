@@ -7,7 +7,7 @@ struct GLFWwindow;
 
 namespace core { class Simulation; class OrbitCamera; }
 namespace render { class Renderer2D; class Renderer3D; }
-namespace ui { struct ToolbarState; struct ToolbarActions; }
+namespace ui { struct ToolbarState; }
 namespace app { struct InputState; }
 
 namespace app {
@@ -22,21 +22,27 @@ namespace app {
     };
 
     /**
-     * @brief Main application. Owns window, GL context, UI and the main loop.
+     * @brief Main application class.
+     *
+     * Owns the platform window, OpenGL context, and orchestrates the main loop.
      */
     class App {
     public:
         explicit App(const AppConfig& cfg);
         ~App();
 
+        // Application instance is unique and tied to a single window context
+        App(const App&) = delete;
+        App& operator=(const App&) = delete;
+
         /**
-         * @brief Initialize window, OpenGL loader and ImGui.
+         * @brief Initialize window, OpenGL loader, and UI context.
          * @return True on success, false otherwise.
          */
         bool init();
 
         /**
-         * @brief Run the main loop until the window closes.
+         * @brief Execute the main application loop.
          */
         void run();
 
@@ -46,42 +52,36 @@ namespace app {
         void shutdown();
 
         /**
-         * @brief Framebuffer resize handler used by GLFW.
+         * @brief Callback handler for framebuffer resize events.
          * @param width New framebuffer width.
          * @param height New framebuffer height.
          */
         void onResize(int width, int height);
 
         /**
-         * @brief Scroll handler used by GLFW (Y axis).
-         * @param yoff Scroll delta on Y.
+         * @brief Callback handler for scroll events.
+         * @param yoff Scroll delta on the Y axis.
          */
         void onScroll(double yoff);
 
     private:
-        // Non-copyable
-        App(const App&) = delete;
-        App& operator=(const App&) = delete;
-
-        // Init and teardown
         bool initGlfw();
         bool initGlad();
         bool initImgui();
         void shutdownImgui();
 
-        // Per-frame stages
         void updateInput();
         void simulate(double dt);
         void draw2D();
         void draw3D();
 
-    private:
         AppConfig config_{};
-        GLFWwindow* window_ = nullptr;
+        GLFWwindow* window_ = nullptr; // raw pointer owned by GLFW logic
 
         int fbWidth_ = 0;
         int fbHeight_ = 0;
 
+        // Subsystems (smart pointers for automatic RAII cleanup)
         std::unique_ptr<core::Simulation> simulation_;
         std::unique_ptr<core::OrbitCamera> camera_;
         std::unique_ptr<render::Renderer2D> r2d_;
@@ -89,6 +89,7 @@ namespace app {
         std::unique_ptr<ui::ToolbarState> toolbarState_;
         std::unique_ptr<InputState> input_;
 
+        // Timing and input state
         double lastTime_ = 0.0;
         double scrollDelta_ = 0.0;
     };

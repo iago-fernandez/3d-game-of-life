@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/simulation.h"
+#include "../core/simulation.h"
 
 #include <imgui.h>
 
@@ -29,7 +29,8 @@ namespace ui {
     /**
      * @brief Draw the toolbar and return actions requested by the user.
      * @param state Persistent widget state (inputs).
-     * @param sim   Simulation to read current values.
+     * @param sim Simulation to read current values.
+     * @return Struct containing any actions triggered this frame.
      */
     ToolbarActions drawToolbar(ToolbarState& state, const core::Simulation& sim);
 

@@ -7,7 +7,7 @@
 namespace render {
 
     Renderer3D::Renderer3D(core::Simulation& sim) : sim_(sim) {
-        program_ = makeProgramFromFiles(SHADER_DIR "/shader3d.vert", SHADER_DIR "/shader3d.frag");
+        program_ = utils::makeProgramFromFiles(SHADER_DIR "/shader3d.vert", SHADER_DIR "/shader3d.frag");
         glUseProgram(program_);
 
         uMVP_ = glGetUniformLocation(program_, "uMVP");
@@ -21,16 +21,17 @@ namespace render {
         uEdgeVColor_ = glGetUniformLocation(program_, "uEdgeVColor");
         uEdgePxUV_ = glGetUniformLocation(program_, "uEdgePxUV");
 
+        // Initial mesh build
         torus_ = model::makeTorusGrid(sim_.width(), sim_.height(), 2.0f, 0.7f);
     }
 
     Renderer3D::~Renderer3D() {
-        destroyTorus(torus_);
+        model::destroyTorus(torus_);
         if (program_) glDeleteProgram(program_);
     }
 
     void Renderer3D::rebuildMesh(int cols, int rows) {
-        destroyTorus(torus_);
+        model::destroyTorus(torus_);
         torus_ = model::makeTorusGrid(cols, rows, 2.0f, 0.7f);
     }
 
@@ -45,12 +46,18 @@ namespace render {
         glUseProgram(program_);
 
         glUniformMatrix4fv(uMVP_, 1, GL_FALSE, &mvp[0][0]);
-        glUniform1i(uState_, 0);
+        glUniform1i(uState_, 0); // texture unit 0
         glUniform2i(uGridSize_, sim_.width(), sim_.height());
+
+        // Colors
         glUniform3f(uDeadColor_, 1.0f, 1.0f, 1.0f);
         glUniform3f(uAliveColor_, 0.0f, 0.0f, 0.0f);
+
+        // Grid lines
         glUniform1f(uLinePx_, 0.7f);
         glUniform3f(uLineColor_, 0.75f, 0.75f, 0.75f);
+
+        // Edge highlighting (topology seam)
         glUniform3f(uEdgeUColor_, 0.30f, 0.50f, 1.00f);
         glUniform3f(uEdgeVColor_, 1.00f, 0.35f, 0.35f);
         glUniform1f(uEdgePxUV_, 2.0f);

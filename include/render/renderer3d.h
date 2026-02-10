@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/simulation.h"
-#include "core/camera.h"
-#include "model/torus.h"
+#include "../core/simulation.h"
+#include "../core/camera.h"
+#include "../model/torus.h"
 
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
