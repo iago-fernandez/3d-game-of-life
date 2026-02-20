@@ -1,3 +1,7 @@
+/**
+ * @file shader2d.vert
+ * @brief Vertex shader for the 2D grid view. Procedurally generates a fullscreen quad.
+ */
 #version 330 core
 
 out vec2 vUV;

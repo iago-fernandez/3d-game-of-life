@@ -1,3 +1,7 @@
+/**
+ * @file shader3d.frag
+ * @brief Fragment shader for the 3D surface. Computes UV-derivative-based anti-aliased grid lines and topology seams.
+ */
 #version 330 core
 
 in vec2 vUV;
