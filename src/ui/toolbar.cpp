@@ -1,3 +1,7 @@
+/**
+ * @file toolbar.cpp
+ * @brief Implements the ImGui widget drawing logic and event handling for the simulation control panel.
+ */
 #include "../../include/ui/toolbar.h"
 
 namespace ui {

@@ -1,3 +1,7 @@
+/**
+ * @file simulation.h
+ * @brief High-level simulation wrapper managing CPU-side cellular logic and GPU-side state synchronization.
+ */
 #pragma once
 
 #include "core/gameLogic.h"

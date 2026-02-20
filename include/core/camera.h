@@ -1,3 +1,7 @@
+/**
+ * @file camera.h
+ * @brief Defines the orbit camera for 3D navigation, handling spherical coordinates and view matrix calculations.
+ */
 #pragma once
 
 #include <glm/glm.hpp>

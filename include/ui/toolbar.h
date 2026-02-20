@@ -1,3 +1,7 @@
+/**
+ * @file toolbar.h
+ * @brief Defines the immediate-mode UI toolbar layout and the action emission structures.
+ */
 #pragma once
 
 #include "core/simulation.h"

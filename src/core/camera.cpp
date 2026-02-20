@@ -1,3 +1,7 @@
+/**
+ * @file camera.cpp
+ * @brief Implements the orbit camera logic, including input application and Cartesian conversion.
+ */
 #include "../../include/core/camera.h"
 
 #include <algorithm>

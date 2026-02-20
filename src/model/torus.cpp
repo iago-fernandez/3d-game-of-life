@@ -1,3 +1,7 @@
+/**
+ * @file torus.cpp
+ * @brief Implements parametric torus vertex generation, index buffering, and OpenGL resource allocation.
+ */
 #include "../../include/model/torus.h"
 
 #include <vector>

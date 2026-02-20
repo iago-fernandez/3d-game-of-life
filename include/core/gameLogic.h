@@ -1,3 +1,7 @@
+/**
+ * @file gameLogic.h
+ * @brief Defines the core cellular automaton logic, buffer management, and state storage for the toroidal grid.
+ */
 #pragma once
 
 #include <vector>

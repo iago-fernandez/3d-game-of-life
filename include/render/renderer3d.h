@@ -1,3 +1,7 @@
+/**
+ * @file renderer3d.h
+ * @brief Defines the 3D renderer for the toroidal mesh, managing view-projection matrices and shader uniforms.
+ */
 #pragma once
 
 #include "core/simulation.h"
