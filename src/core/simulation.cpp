@@ -1,3 +1,7 @@
+/**
+ * @file simulation.cpp
+ * @brief Implements simulation loop control, texture uploads, and grid resizing mechanics.
+ */
 #include "../../include/core/simulation.h"
 
 #include <algorithm>

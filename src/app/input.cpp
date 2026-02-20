@@ -1,3 +1,7 @@
+/**
+ * @file input.cpp
+ * @brief Empty compilation unit for the header-only input data structures.
+ */
 #include "../../include/app/input.h"
 
 // This compilation unit is intentionally empty as InputState is a header-only POD struct.

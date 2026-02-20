@@ -1,3 +1,7 @@
+/**
+ * @file shader2d.frag
+ * @brief Fragment shader for the 2D view. Handles cell state fetching, hover effects, and pixel-perfect grid lines.
+ */
 #version 330 core
 
 in vec2 vUV;

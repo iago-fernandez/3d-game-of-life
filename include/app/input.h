@@ -1,3 +1,7 @@
+/**
+ * @file input.h
+ * @brief Defines the per-frame input snapshot data structures for mouse and keyboard state.
+ */
 #pragma once
 
 namespace app {

@@ -1,3 +1,7 @@
+/**
+ * @file renderer2d.cpp
+ * @brief Implements the 2D renderer, handling shader compilation, uniform uploads, and viewport mapping.
+ */
 #include "../../include/render/renderer2d.h"
 
 #include "../../include/utils/shaderUtils.h"

@@ -1,3 +1,7 @@
+/**
+ * @file app.h
+ * @brief Defines the main application lifecycle, window management, and subsystem orchestration.
+ */
 #pragma once
 
 #include <memory>

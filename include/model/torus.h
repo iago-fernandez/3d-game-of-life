@@ -1,3 +1,7 @@
+/**
+ * @file torus.h
+ * @brief Defines the data structures and functions for procedurally generating and managing a 3D toroidal mesh on the GPU.
+ */
 #pragma once
 
 #include <glad/glad.h>

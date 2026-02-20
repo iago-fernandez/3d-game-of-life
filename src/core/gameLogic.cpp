@@ -1,3 +1,7 @@
+/**
+ * @file gameLogic.cpp
+ * @brief Implements the Game of Life evolution rules, double buffering, and toroidal coordinate wrapping.
+ */
 #include "../../include/core/gameLogic.h"
 
 #include <algorithm>

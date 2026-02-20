@@ -1,3 +1,7 @@
+/**
+ * @file app.cpp
+ * @brief Implements the App class, handling GLFW/OpenGL context creation, input routing, and the main simulation loop.
+ */
 #include "../../include/app/app.h"
 
 #include "../../include/app/input.h"

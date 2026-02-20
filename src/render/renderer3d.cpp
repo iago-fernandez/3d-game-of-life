@@ -1,3 +1,7 @@
+/**
+ * @file renderer3d.cpp
+ * @brief Implements the 3D rendering pipeline, including mesh rebuilding upon grid resize and camera transforms.
+ */
 #include "../../include/render/renderer3d.h"
 
 #include "../../include/utils/shaderUtils.h"

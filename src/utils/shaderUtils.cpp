@@ -1,3 +1,7 @@
+/**
+ * @file shaderUtils.cpp
+ * @brief Implements the OpenGL shader compilation and linking wrappers, handling file I/O and validation logs.
+ */
 #include "../../include/utils/shaderUtils.h"
 
 #include <string>

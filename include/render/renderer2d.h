@@ -1,3 +1,7 @@
+/**
+ * @file renderer2d.h
+ * @brief Defines the 2D fullscreen quad renderer for grid visualization and mouse coordinate mapping.
+ */
 #pragma once
 
 #include "../core/simulation.h"

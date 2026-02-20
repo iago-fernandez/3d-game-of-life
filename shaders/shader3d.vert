@@ -1,3 +1,7 @@
+/**
+ * @file shader3d.vert
+ * @brief Vertex shader for the 3D toroidal mesh, applying the Model-View-Projection matrix.
+ */
 #version 330 core
 
 layout(location = 0) in vec3 aPos;
